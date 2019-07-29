@@ -3,11 +3,13 @@ package domain
 import (
 	"github.com/agileengine/financialAccountServer/model"
 	"github.com/agileengine/financialAccountServer/util"
+	"sync"
 )
 
 //Transaction manages all user transaction
 type Transaction struct{
 	transactions map[string][]*model.Transaction
+	mux sync.Mutex
 }
 
 //NewTransaction creates an instance of Transaction
@@ -29,9 +31,16 @@ func (t *Transaction) InitializeUserAccount(userID string){
 	t.transactions[userID] = make([]*model.Transaction, 0)
 }
 
-func (t *Transaction) AddTransaction(userID string, transaction *model.Transaction) {
+func (t *Transaction) AddTransaction(userID string, transaction *model.Transaction) (*model.Transaction, error) {
 	transaction.ID, _ = util.NewUUID()
 	if val, ok := t.transactions[userID]; ok {
+		t.mux.Lock()
+		// Lock so only one goroutine at a time can write the user transactions
 		t.transactions[userID] = append(val, transaction)
+		t.mux.Unlock()
+
+		return transaction, nil
 	}
+
+	return nil, nil
 }

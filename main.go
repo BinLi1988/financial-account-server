@@ -15,6 +15,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	e.GET("/users/:userID/transactions", routes.GetTransactionHandler)
+	e.POST("/users/:userID/transactions", routes.CreateTransactionHandler)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
