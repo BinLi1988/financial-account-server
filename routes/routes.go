@@ -21,7 +21,11 @@ func CreateTransactionHandler(c echo.Context) error {
 		return err
 	}
 
-	result, _ := app.TransactionManager.AddTransaction(userID, transaction)
+	result, err := app.TransactionManager.AddTransaction(userID, transaction)
+
+	if err != nil {
+		return err
+	}
 
 	return c.JSON(http.StatusCreated, result)
 }

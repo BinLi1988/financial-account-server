@@ -3,6 +3,8 @@ package domain
 import (
 	"github.com/agileengine/financialAccountServer/model"
 	"github.com/agileengine/financialAccountServer/util"
+	"github.com/labstack/echo"
+	"net/http"
 	"sync"
 )
 
@@ -33,6 +35,11 @@ func (t *Transaction) InitializeUserAccount(userID string){
 
 func (t *Transaction) AddTransaction(userID string, transaction *model.Transaction) (*model.Transaction, error) {
 	transaction.ID, _ = util.NewUUID()
+
+	if transaction.Amount < 0 {
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "Bad Request")
+	}
+
 	if val, ok := t.transactions[userID]; ok {
 		t.mux.Lock()
 		// Lock so only one goroutine at a time can write the user transactions
